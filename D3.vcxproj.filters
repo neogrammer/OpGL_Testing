@@ -45,6 +45,12 @@
     <ClCompile Include="learnopengl\shader_s.cpp">
       <Filter>learnopengl</Filter>
     </ClCompile>
+    <ClCompile Include="cube_renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\World.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="third_party\glad\include\KHR\khrplatform.h">
@@ -77,6 +83,27 @@
     <ClInclude Include="src\v4.h">
       <Filter>Header Files\src</Filter>
     </ClInclude>
+    <ClInclude Include="cube_renderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Voxel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Noise.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Planet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chunk.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Mesher.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\World.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="4.2.texture.fs" />
@@ -87,5 +114,9 @@
     <None Include="6.3.coordinate_systems.vs" />
     <None Include="7.4.camera.fs" />
     <None Include="7.4.camera.vs" />
+    <None Include="normals.fs" />
+    <None Include="normals.vs" />
+    <None Include="voxel.fs" />
+    <None Include="voxel.vs" />
   </ItemGroup>
 </Project>

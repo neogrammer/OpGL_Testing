@@ -139,18 +139,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="cube_renderer.cpp" />
     <ClCompile Include="learnopengl\shader_s.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\World.cpp" />
     <ClCompile Include="third_party\glad\src\glad.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cube_renderer.h" />
     <ClInclude Include="learnopengl\camera.h" />
     <ClInclude Include="learnopengl\shader_s.h" />
+    <ClInclude Include="src\Chunk.h" />
     <ClInclude Include="src\m3.h" />
     <ClInclude Include="src\m4.h" />
+    <ClInclude Include="src\Mesher.h" />
+    <ClInclude Include="src\Noise.h" />
+    <ClInclude Include="src\Planet.h" />
     <ClInclude Include="src\v2.h" />
     <ClInclude Include="src\v3.h" />
     <ClInclude Include="src\v4.h" />
+    <ClInclude Include="src\Voxel.h" />
+    <ClInclude Include="src\World.h" />
     <ClInclude Include="third_party\glad\include\glad\glad.h" />
     <ClInclude Include="third_party\glad\include\KHR\khrplatform.h" />
     <ClInclude Include="third_party\stb_image.h" />
@@ -164,6 +173,10 @@
     <None Include="6.3.coordinate_systems.vs" />
     <None Include="7.4.camera.fs" />
     <None Include="7.4.camera.vs" />
+    <None Include="normals.fs" />
+    <None Include="normals.vs" />
+    <None Include="voxel.fs" />
+    <None Include="voxel.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
