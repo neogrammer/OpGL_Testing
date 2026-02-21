@@ -4,6 +4,7 @@
 #include <glad/glad.h>
 #include <glm.hpp>
 #include "Voxel.h"
+#include "../app/GpuMesh.h"
 
 static constexpr int CHUNK_SIZE = 16;
 
@@ -16,13 +17,8 @@ struct Chunk {
     //GLuint vao = 0;
     //GLuint vbo = 0;
     //int vertexCount = 0;
-    GLuint vaoOpaque = 0;
-    GLuint vboOpaque = 0;
-    int opaqueCount = 0;
-
-    GLuint vaoWater = 0;
-    GLuint vboWater = 0;
-    int waterCount = 0;
+    GpuMesh opaque;
+    GpuMesh water;
 
     bool dirty = true;
     bool generated = false;

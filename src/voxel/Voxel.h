@@ -1,15 +1,7 @@
 #pragma once
 #include <cstdint>
+#include "Block.h"
 
-enum class Block : uint8_t {
-    Air = 0,
-    Grass,
-    Dirt,
-    Stone,
-    Sand,
-    Snow,
-    Water
-};
 
 inline int BlockLayer(Block b) {
     switch (b) {

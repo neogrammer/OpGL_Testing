@@ -1,4 +1,5 @@
 #include "../World.h"
+#include <src/mesh/ChunkMesher.h>
 #include "World_render.cpp"
 
 
@@ -211,21 +212,17 @@ void World::BuildChunkMesh(Chunk& c) {
         c.coord.z * CHUNK_SIZE
     );
 
-    std::vector<VoxelVertex> opaqueVerts;
-    std::vector<VoxelVertex> waterVerts;
+    // Start with face-culling first (checkpoint A)
+    ChunkMeshData mesh = BuildChunkMeshGreedy(
+        c.blocks,
+        chunkBase,
+        [&](int wx, int wy, int wz) { return GetBlock(wx, wy, wz); },
+        cubeNetW, cubeNetH
+    );
 
-    // Pass 1: Opaque blocks (treat Water like "air" so solids render against it)
-    BuildGreedyMeshPass(*this, chunkBase, cubeNetW, cubeNetH,
-        [](Block b) { return IsOpaque(b); },
-        opaqueVerts);
-
-    // Pass 2: Water blocks (only Water is solid for this pass)
-    BuildGreedyMeshPass(*this, chunkBase, cubeNetW, cubeNetH,
-        [](Block b) { return b == Block::Water; },
-        waterVerts);
-
-    UploadMesh(c.vaoOpaque, c.vboOpaque, opaqueVerts, c.opaqueCount);
-    UploadMesh(c.vaoWater, c.vboWater, waterVerts, c.waterCount);
+    // Upload to GPU
+    c.opaque.Upload(mesh.opaque);
+    c.water.Upload(mesh.water);
 
     c.dirty = false;
 }

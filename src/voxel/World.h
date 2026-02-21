@@ -76,22 +76,16 @@ public:
     void RebuildDirtyMeshes();     // mesh upload step
 
     //void Draw() const;
-     inline void DrawOpaque() const {
-         for (auto& [cc, c] : chunks) {
-             if (c.opaqueCount == 0) continue;
-             glBindVertexArray(c.vaoOpaque);
-             glDrawArrays(GL_TRIANGLES, 0, c.opaqueCount);
-         }
-         glBindVertexArray(0);
-     }
+    inline void DrawOpaque() const {
+        for (auto& [cc, c] : chunks) { c.opaque.Draw(); }
+        glBindVertexArray(0);
+
+    }
+
 
 
      inline void DrawWater() const {
-         for (auto& [cc, c] : chunks) {
-             if (c.waterCount == 0) continue;
-             glBindVertexArray(c.vaoWater);
-             glDrawArrays(GL_TRIANGLES, 0, c.waterCount);
-         }
+         for (auto& [cc, c] : chunks) c.water.Draw();
          glBindVertexArray(0);
      }
 
@@ -105,7 +99,7 @@ private:
     std::deque<ChunkCoord> meshQueue;
 
     int renderDistance = 2;
-    int unloadDistance = 3;
+    int unloadDistance = 8;
 
     void FillChunkBlocks(Chunk& c);
     void BuildChunkMesh(Chunk& c);
@@ -114,5 +108,3 @@ private:
     int cubeNetH = 96;
 };
 
-
-struct VoxelVertex { glm::vec3 pos; glm::vec2 uv; glm::vec3 normal; float layer; };

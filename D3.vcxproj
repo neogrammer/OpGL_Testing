@@ -143,6 +143,8 @@
     <ClCompile Include="learnopengl\shader_s.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\app\App.cpp" />
+    <ClCompile Include="src\app\GpuMesh.cpp" />
+    <ClCompile Include="src\mesh\ChunkMesher.cpp" />
     <ClCompile Include="src\utility\TextureUtils.cpp" />
     <ClCompile Include="src\voxel\World.cpp" />
     <ClCompile Include="src\voxel\world\World_core.cpp" />
@@ -156,12 +158,16 @@
     <ClInclude Include="learnopengl\camera.h" />
     <ClInclude Include="learnopengl\shader_s.h" />
     <ClInclude Include="src\app\App.h" />
+    <ClInclude Include="src\app\GpuMesh.h" />
     <ClInclude Include="src\m3.h" />
     <ClInclude Include="src\m4.h" />
+    <ClInclude Include="src\mesh\ChunkMesher.h" />
+    <ClInclude Include="src\mesh\VoxelVertex.h" />
     <ClInclude Include="src\utility\TextureUtils.h" />
     <ClInclude Include="src\v2.h" />
     <ClInclude Include="src\v3.h" />
     <ClInclude Include="src\v4.h" />
+    <ClInclude Include="src\voxel\Block.h" />
     <ClInclude Include="src\voxel\Chunk.h" />
     <ClInclude Include="src\voxel\Mesher.h" />
     <ClInclude Include="src\voxel\Noise.h" />

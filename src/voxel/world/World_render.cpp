@@ -1,6 +1,7 @@
 #include "../World.h"
 
 #include "../Mesher.h"
+#include "../mesh/VoxelVertex.h"
 
 
 static void UploadMesh(GLuint& vao, GLuint& vbo,

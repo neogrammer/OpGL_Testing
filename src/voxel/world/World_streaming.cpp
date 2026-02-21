@@ -73,11 +73,8 @@ void World::UpdateStreaming(glm::vec3 cameraPos)
         if (it != chunks.end())
         {
             Chunk& c = it->second;
-            if (c.vaoOpaque) glDeleteVertexArrays(1, &c.vaoOpaque);
-            if (c.vaoWater) glDeleteVertexArrays(1, &c.vaoWater);
-
-            if (c.vboOpaque) glDeleteBuffers(1, &c.vboOpaque);
-            if (c.vboWater) glDeleteBuffers(1, &c.vboWater);
+            c.opaque.Destroy();
+            c.water.Destroy();
 
             chunks.erase(it);
         }
@@ -152,9 +149,7 @@ void World::TickBuildQueues(int maxGenPerFrame, int maxMeshPerFrame)
         double t = glfwGetTime();
         if (t - t0 > 1.0) {
             t0 = t;
-            std::cout << "Chunk " << cc.x << "," << cc.y << "," << cc.z
-                << " opaque=" << c.opaqueCount
-                << " water=" << c.waterCount << "\n";
+         
         }
 
 
