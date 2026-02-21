@@ -77,8 +77,8 @@ private:
     std::deque<ChunkCoord> genQueue;
     std::deque<ChunkCoord> meshQueue;
 
-    int renderDistance = 1;
-    int unloadDistance = 2;
+    int renderDistance = 2;
+    int unloadDistance = 3;
 
     void FillChunkBlocks(Chunk& c);
     void BuildChunkMesh(Chunk& c);

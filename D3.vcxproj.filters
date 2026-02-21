@@ -77,9 +77,6 @@
     <ClInclude Include="third_party\glad\include\glad\glad.h">
       <Filter>Header Files\third_party\glad</Filter>
     </ClInclude>
-    <ClInclude Include="third_party\stb_image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="learnopengl\shader_s.h">
       <Filter>learnopengl</Filter>
     </ClInclude>
@@ -101,9 +98,6 @@
     <ClInclude Include="src\v4.h">
       <Filter>Header Files\src</Filter>
     </ClInclude>
-    <ClInclude Include="cube_renderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\voxel\Chunk.h">
       <Filter>Header Files\voxel</Filter>
     </ClInclude>
@@ -124,6 +118,12 @@
     </ClInclude>
     <ClInclude Include="src\voxel\World.h">
       <Filter>Header Files\voxel</Filter>
+    </ClInclude>
+    <ClInclude Include="third_party\stb_image.h">
+      <Filter>Header Files\third_party</Filter>
+    </ClInclude>
+    <ClInclude Include="cube_renderer.h">
+      <Filter>Header Files\utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

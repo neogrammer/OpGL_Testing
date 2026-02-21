@@ -11,6 +11,7 @@
 
 #include <stb_image.h>
 #include <src/utility/TextureUtils.h>
+#include <chrono>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -80,7 +81,7 @@ int main()
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     // draw...
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 
     Shader voxelShader("voxel.vs", "voxel.fs");
@@ -104,7 +105,7 @@ int main()
     voxelShader.use();
     voxelShader.setInt("texArray", 0);
 
-    //world.BuildPlanetOnce();
+   // world.BuildPlanetOnce();
     camera.Position = glm::vec3(0.0f, 0.0f, world.planet.baseRadius + 20.0f);
     while (!glfwWindowShouldClose(window))
     {
@@ -115,7 +116,8 @@ int main()
         processInput(window);
 
         world.UpdateStreaming(camera.Position);
-        world.TickBuildQueues(8, 8);
+        std:
+        world.TickBuildQueues(2, 1);
 
         glClearColor(.1f, 0.38f, 0.33f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
