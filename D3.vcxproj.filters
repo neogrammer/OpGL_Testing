@@ -49,6 +49,9 @@
     <Filter Include="Source Files\utility">
       <UniqueIdentifier>{cef951f9-2e16-417a-9bd5-d720708b00a1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\voxel\World">
+      <UniqueIdentifier>{04da7e10-2b5a-4876-ba3a-4d477f5bdcbb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -68,6 +71,21 @@
     </ClCompile>
     <ClCompile Include="src\utility\TextureUtils.cpp">
       <Filter>Source Files\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\app\App.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\voxel\world\World_core.cpp">
+      <Filter>Source Files\voxel\World</Filter>
+    </ClCompile>
+    <ClCompile Include="src\voxel\world\World_meshing.cpp">
+      <Filter>Source Files\voxel\World</Filter>
+    </ClCompile>
+    <ClCompile Include="src\voxel\world\World_render.cpp">
+      <Filter>Source Files\voxel\World</Filter>
+    </ClCompile>
+    <ClCompile Include="src\voxel\world\World_streaming.cpp">
+      <Filter>Source Files\voxel\World</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -124,6 +142,9 @@
     </ClInclude>
     <ClInclude Include="cube_renderer.h">
       <Filter>Header Files\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="src\app\App.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

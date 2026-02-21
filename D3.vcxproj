@@ -71,7 +71,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\VulkanSDK\1.3.296.0\Include\glm;C:\Users\jlhar\source\repos\D3\third_party\glad\include;C:\tools\glfw\include;C:\dev\Assimp\assimp\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\jlhar\source\repos\D3\src\app;C:\VulkanSDK\1.3.296.0\Include\glm;C:\Users\jlhar\source\repos\D3\third_party\glad\include;C:\tools\glfw\include;C:\dev\Assimp\assimp\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\tools\glfw\build\src\Debug;C:\dev\Assimp\assimp\lib\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -142,14 +142,20 @@
     <ClCompile Include="cube_renderer.cpp" />
     <ClCompile Include="learnopengl\shader_s.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\app\App.cpp" />
     <ClCompile Include="src\utility\TextureUtils.cpp" />
     <ClCompile Include="src\voxel\World.cpp" />
+    <ClCompile Include="src\voxel\world\World_core.cpp" />
+    <ClCompile Include="src\voxel\world\World_meshing.cpp" />
+    <ClCompile Include="src\voxel\world\World_render.cpp" />
+    <ClCompile Include="src\voxel\world\World_streaming.cpp" />
     <ClCompile Include="third_party\glad\src\glad.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cube_renderer.h" />
     <ClInclude Include="learnopengl\camera.h" />
     <ClInclude Include="learnopengl\shader_s.h" />
+    <ClInclude Include="src\app\App.h" />
     <ClInclude Include="src\m3.h" />
     <ClInclude Include="src\m4.h" />
     <ClInclude Include="src\utility\TextureUtils.h" />

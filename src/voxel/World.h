@@ -1,5 +1,3 @@
-#pragma message("USING World.h from: " __FILE__)
-
 #pragma once
 
 
@@ -48,7 +46,19 @@ extern glm::ivec3 CameraVoxel(glm::vec3 camPos);
 
 extern ChunkCoord CameraChunk(glm::vec3 camPos);
 
+static const glm::ivec2 TILE_TOP = { 1,2 };
+static const glm::ivec2 TILE_BOTTOM = { 1,0 };
 
+// what tile to use when a face is acting like a “side”
+// (for +Y/-Y acting as sides, we just use the front side tile)
+static const glm::ivec2 SIDE_TILE[6] = {
+    {2,1}, // +X  -> right side tile
+    {0,1}, // -X  -> left side tile
+    {1,1}, // +Y  -> use front side tile
+    {1,1}, // -Y  -> use front side tile
+    {1,1}, // +Z  -> front side tile
+    {3,1}, // -Z  -> back side tile
+};
 
 
 
@@ -56,6 +66,7 @@ class World {
 public:
     PlanetParams planet;
 
+ 
 
 
     Chunk& GetOrCreateChunk(ChunkCoord cc);
@@ -65,8 +76,24 @@ public:
     void RebuildDirtyMeshes();     // mesh upload step
 
     //void Draw() const;
-    void DrawOpaque() const;
-    void DrawWater() const;
+     inline void DrawOpaque() const {
+         for (auto& [cc, c] : chunks) {
+             if (c.opaqueCount == 0) continue;
+             glBindVertexArray(c.vaoOpaque);
+             glDrawArrays(GL_TRIANGLES, 0, c.opaqueCount);
+         }
+         glBindVertexArray(0);
+     }
+
+
+     inline void DrawWater() const {
+         for (auto& [cc, c] : chunks) {
+             if (c.waterCount == 0) continue;
+             glBindVertexArray(c.vaoWater);
+             glDrawArrays(GL_TRIANGLES, 0, c.waterCount);
+         }
+         glBindVertexArray(0);
+     }
 
     void UpdateStreaming(glm::vec3 cameraPos);
     void TickBuildQueues(int maxGenPerFrame, int maxMeshPerFrame);
@@ -86,3 +113,6 @@ private:
     int cubeNetW = 128;
     int cubeNetH = 96;
 };
+
+
+struct VoxelVertex { glm::vec3 pos; glm::vec2 uv; glm::vec3 normal; float layer; };

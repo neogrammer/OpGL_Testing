@@ -1,3 +1,12 @@
+//#include <App.h>
+//
+//int main() { App app; return app.Run(); }
+
+
+
+
+
+
 #include <learnopengl/shader_s.h>
 
 #include <glm.hpp>
@@ -116,7 +125,7 @@ int main()
         processInput(window);
 
         world.UpdateStreaming(camera.Position);
-        std:
+        
         world.TickBuildQueues(2, 1);
 
         glClearColor(.1f, 0.38f, 0.33f, 1.0f);
