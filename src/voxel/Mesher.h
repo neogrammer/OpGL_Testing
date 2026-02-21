@@ -37,13 +37,16 @@ inline void GetCubeNetUVs(int faceIndex, int texW, int texH, glm::vec2 outUV[4])
 
     int col = FACE_TILE[faceIndex].x;
     int row = FACE_TILE[faceIndex].y;
-    float flippedRow = 2 - row;   // since 3 rows total (0,1,2)
+    //float flippedRow = 2.f - row;   // since 3 rows total (0,1,2)
+
+
 
     float u0 = col * tileW;
-    float v0 = flippedRow * tileH;
+   // float v0 = flippedRow * tileH;
     float u1 = u0 + tileW;
+    //float v1 = v0 + tileH;
+    float v0 = row * tileH;
     float v1 = v0 + tileH;
-
     // half texel padding (safe even with NEAREST, useful if you later change filters)
     float padU = 0.5f / float(texW);
     float padV = 0.5f / float(texH);
@@ -61,12 +64,42 @@ inline void GetCubeNetUVs(int faceIndex, int texW, int texH, glm::vec2 outUV[4])
     }
 }
 
-static const FaceDef FACES[6] = {
+
+inline void GetCubeNetUVsTile(int faceIndex, int col, int row, int texW, int texH, glm::vec2 outUV[4]) {
+    const float tileW = 1.0f / 4.0f;
+    const float tileH = 1.0f / 3.0f;
+
+    // you used stbi_set_flip_vertically_on_load(true)
+    //int flippedRow = 2 - row; // rows: 0,1,2
+
+    float u0 = col * tileW;
+    //float v0 = flippedRow * tileH;
+    float u1 = u0 + tileW;
+   // float v1 = v0 + tileH;
+
+    float v0 = row * tileH;
+    float v1 = v0 + tileH;
+
+    // half-texel padding (prevents bleeding between tiles)
+    float padU = 0.5f / float(texW);
+    float padV = 0.5f / float(texH);
+    u0 += padU; v0 += padV;
+    u1 -= padU; v1 -= padV;
+
+    glm::vec2 rect[4] = {
+        {u0,v0}, {u0,v1}, {u1,v1}, {u1,v0}
+    };
+
+    for (int c = 0; c < 4; c++) {
+        outUV[c] = rect[FACE_UV_MAP[faceIndex][c]];
+    }
+}
+
+    static const FaceDef FACES[6] = {
     {{ 1,0,0}, { 1,0,0}, {{1,0,0},{1,1,0},{1,1,1},{1,0,1}}}, // +X
     {{-1,0,0}, {-1,0,0}, {{0,0,1},{0,1,1},{0,1,0},{0,0,0}}}, // -X
-    {{0,-1,0}, {0,-1,0}, {{0,0,0},{1,0,0},{1,0,1},{0,0,1}}}, // -Y
     {{0, 1,0}, {0, 1,0}, {{0,1,1},{1,1,1},{1,1,0},{0,1,0}}}, // +Y
-
+    {{0,-1,0}, {0,-1,0}, {{0,0,0},{1,0,0},{1,0,1},{0,0,1}}}, // -Y
     {{0,0, 1}, {0,0, 1}, {{1,0,1},{1,1,1},{0,1,1},{0,0,1}}}, // +Z
     {{0,0,-1}, {0,0,-1}, {{0,0,0},{0,1,0},{1,1,0},{1,0,0}}}, // -Z
 };

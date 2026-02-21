@@ -7,9 +7,10 @@
 #include <iostream>
 #include <learnopengl/camera.h>
 #include "cube_renderer.h"
-#include "src/World.h"
+#include "src/voxel/World.h"
 
 #include <stb_image.h>
+#include <src/utility/TextureUtils.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -70,7 +71,16 @@ int main()
 
     // configure global opengl state
    // -----------------------------
-    glEnable(GL_DEPTH_TEST);
+    glEnable(0x0B71);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+ 
+
+
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // draw...
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 
     Shader voxelShader("voxel.vs", "voxel.fs");
@@ -81,32 +91,45 @@ int main()
     world.planet.octaves = 5;
 
 
+    int texW = 0, texH = 0;
+    GLuint blockTexArray = util::LoadTexture2DArray({
+        "assets/textures/voxel_cube_grass.png", // layer 0
+        "assets/textures/voxel_cube_dirt.png",  // layer 1
+        "assets/textures/voxel_cube_stone_2.png", // layer 2
+        "assets/textures/voxel_cube_sand.png",  // layer 3
+        "assets/textures/voxel_cube_snow.png",  // layer 4
+        "assets/textures/voxel_cube_water.png", // layer 5
+        }, texW, texH);
+
+    voxelShader.use();
+    voxelShader.setInt("texArray", 0);
+
   
-    GLuint atlasTex; //* load a tileable voxel texture */;
-    glGenTextures(1, &atlasTex);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, atlasTex);
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    // load image, create texture and generate mipmaps
-    int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-    unsigned char* data = stbi_load(std::string("assets/textures/voxel_cube_1.png").c_str(), &width, &height, &nrChannels, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
-    world.BuildPlanetOnce();
+    //GLuint atlasTex; //* load a tileable voxel texture */;
+    //glGenTextures(1, &atlasTex);
+    //glActiveTexture(GL_TEXTURE0);
+    //glBindTexture(GL_TEXTURE_2D, atlasTex);
+    //// set the texture wrapping parameters
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //// load image, create texture and generate mipmaps
+    //int width, height, nrChannels;
+    //stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+    //unsigned char* data = stbi_load(std::string("assets/textures/voxel_cube_1.png").c_str(), &width, &height, &nrChannels, 0);
+    //if (data)
+    //{
+    //    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    //    glGenerateMipmap(GL_TEXTURE_2D);
+    //}
+    //else
+    //{
+    //    std::cout << "Failed to load texture" << std::endl;
+    //}
+    //stbi_image_free(data);
+    //world.BuildPlanetOnce();
     camera.Position = glm::vec3(0.0f, 0.0f, world.planet.baseRadius + 20.0f);
     while (!glfwWindowShouldClose(window))
     {
@@ -116,7 +139,10 @@ int main()
 
         processInput(window);
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        world.UpdateStreaming(camera.Position);
+        world.TickBuildQueues(8, 8);
+
+        glClearColor(.1f, 0.38f, 0.33f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom),
@@ -126,12 +152,26 @@ int main()
         voxelShader.use();
         voxelShader.setMat4("projection", projection);
         voxelShader.setMat4("view", view);
+        voxelShader.setInt("texArray", 0);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, atlasTex);
-        voxelShader.setInt("texture1", 0);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, blockTexArray);
+        
+       
 
-        world.Draw();
+        
+        // draw opaque pass
+        glDisable(GL_BLEND);
+        glDepthMask(GL_TRUE);
+        world.DrawOpaque();
+
+        // draw water pass
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDepthMask(GL_FALSE);
+        world.DrawWater();
+        glDepthMask(GL_TRUE);
+        glDisable(GL_BLEND);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

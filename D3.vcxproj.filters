@@ -34,6 +34,21 @@
     <Filter Include="Header Files\src">
       <UniqueIdentifier>{e9839667-fab4-415d-8d92-fc25a073f505}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\voxel">
+      <UniqueIdentifier>{9879e064-554a-4d71-869a-f459a40f5116}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\voxel">
+      <UniqueIdentifier>{62a0ec88-3cfc-46e7-960d-a123d5c47334}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\textures">
+      <UniqueIdentifier>{4693163e-2289-42b1-b46b-b4e934e4a3e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\utility">
+      <UniqueIdentifier>{00be91b5-4131-4aed-bf87-051713cef4a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\utility">
+      <UniqueIdentifier>{cef951f9-2e16-417a-9bd5-d720708b00a1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -48,8 +63,11 @@
     <ClCompile Include="cube_renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\World.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\voxel\World.cpp">
+      <Filter>Source Files\voxel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utility\TextureUtils.cpp">
+      <Filter>Source Files\utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -86,23 +104,26 @@
     <ClInclude Include="cube_renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Voxel.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\voxel\Chunk.h">
+      <Filter>Header Files\voxel</Filter>
     </ClInclude>
-    <ClInclude Include="src\Noise.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\voxel\Mesher.h">
+      <Filter>Header Files\voxel</Filter>
     </ClInclude>
-    <ClInclude Include="src\Planet.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\voxel\Noise.h">
+      <Filter>Header Files\voxel</Filter>
     </ClInclude>
-    <ClInclude Include="src\Chunk.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\voxel\Planet.h">
+      <Filter>Header Files\voxel</Filter>
     </ClInclude>
-    <ClInclude Include="src\Mesher.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\voxel\Voxel.h">
+      <Filter>Header Files\voxel</Filter>
     </ClInclude>
-    <ClInclude Include="src\World.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\utility\TextureUtils.h">
+      <Filter>Header Files\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="src\voxel\World.h">
+      <Filter>Header Files\voxel</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -118,5 +139,46 @@
     <None Include="normals.vs" />
     <None Include="voxel.fs" />
     <None Include="voxel.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\textures\awesomeface.png">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="assets\textures\container.jpg">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="assets\textures\light512.png">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="assets\textures\voxel_cube_1.png">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="assets\textures\voxel_cube_dirt.png">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="assets\textures\voxel_cube_ice.png">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="assets\textures\voxel_cube_sand.png">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="assets\textures\voxel_cube_snow.png">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="assets\textures\voxel_cube_stone.png">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="assets\textures\voxel_cube_stone_2.png">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="assets\textures\voxel_cube_water.png">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="assets\textures\wall.jpg">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="assets\textures\voxel_cube_grass.png">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>

@@ -1,6 +1,11 @@
+#pragma message("USING World.h from: " __FILE__)
+
 #pragma once
+
+
 #include <unordered_map>
 #include <vector>
+#include <deque>
 #include <glm.hpp>
 #include "Chunk.h"
 #include "Planet.h"
@@ -31,9 +36,27 @@ inline int Mod(int a, int b) {
     return m;
 }
 
+inline ChunkCoord WorldToChunk(int wx, int wy, int wz) {
+    return {
+        FloorDiv(wx, CHUNK_SIZE),
+        FloorDiv(wy, CHUNK_SIZE),
+        FloorDiv(wz, CHUNK_SIZE)
+    };
+}
+
+extern glm::ivec3 CameraVoxel(glm::vec3 camPos);
+
+extern ChunkCoord CameraChunk(glm::vec3 camPos);
+
+
+
+
+
 class World {
 public:
     PlanetParams planet;
+
+
 
     Chunk& GetOrCreateChunk(ChunkCoord cc);
     Block GetBlock(int wx, int wy, int wz) const;
@@ -41,11 +64,25 @@ public:
     void BuildPlanetOnce();        // simple start: generate whole small planet
     void RebuildDirtyMeshes();     // mesh upload step
 
-    void Draw() const;
+    //void Draw() const;
+    void DrawOpaque() const;
+    void DrawWater() const;
+
+    void UpdateStreaming(glm::vec3 cameraPos);
+    void TickBuildQueues(int maxGenPerFrame, int maxMeshPerFrame);
 
 private:
     std::unordered_map<ChunkCoord, Chunk, ChunkCoordHash> chunks;
 
+    std::deque<ChunkCoord> genQueue;
+    std::deque<ChunkCoord> meshQueue;
+
+    int renderDistance = 1;
+    int unloadDistance = 2;
+
     void FillChunkBlocks(Chunk& c);
     void BuildChunkMesh(Chunk& c);
+
+    int cubeNetW = 128;
+    int cubeNetH = 96;
 };

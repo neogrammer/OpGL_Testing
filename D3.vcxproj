@@ -142,24 +142,26 @@
     <ClCompile Include="cube_renderer.cpp" />
     <ClCompile Include="learnopengl\shader_s.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="src\World.cpp" />
+    <ClCompile Include="src\utility\TextureUtils.cpp" />
+    <ClCompile Include="src\voxel\World.cpp" />
     <ClCompile Include="third_party\glad\src\glad.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cube_renderer.h" />
     <ClInclude Include="learnopengl\camera.h" />
     <ClInclude Include="learnopengl\shader_s.h" />
-    <ClInclude Include="src\Chunk.h" />
     <ClInclude Include="src\m3.h" />
     <ClInclude Include="src\m4.h" />
-    <ClInclude Include="src\Mesher.h" />
-    <ClInclude Include="src\Noise.h" />
-    <ClInclude Include="src\Planet.h" />
+    <ClInclude Include="src\utility\TextureUtils.h" />
     <ClInclude Include="src\v2.h" />
     <ClInclude Include="src\v3.h" />
     <ClInclude Include="src\v4.h" />
-    <ClInclude Include="src\Voxel.h" />
-    <ClInclude Include="src\World.h" />
+    <ClInclude Include="src\voxel\Chunk.h" />
+    <ClInclude Include="src\voxel\Mesher.h" />
+    <ClInclude Include="src\voxel\Noise.h" />
+    <ClInclude Include="src\voxel\Planet.h" />
+    <ClInclude Include="src\voxel\Voxel.h" />
+    <ClInclude Include="src\voxel\World.h" />
     <ClInclude Include="third_party\glad\include\glad\glad.h" />
     <ClInclude Include="third_party\glad\include\KHR\khrplatform.h" />
     <ClInclude Include="third_party\stb_image.h" />
@@ -177,6 +179,21 @@
     <None Include="normals.vs" />
     <None Include="voxel.fs" />
     <None Include="voxel.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\textures\awesomeface.png" />
+    <Image Include="assets\textures\container.jpg" />
+    <Image Include="assets\textures\light512.png" />
+    <Image Include="assets\textures\voxel_cube_1.png" />
+    <Image Include="assets\textures\voxel_cube_dirt.png" />
+    <Image Include="assets\textures\voxel_cube_grass.png" />
+    <Image Include="assets\textures\voxel_cube_ice.png" />
+    <Image Include="assets\textures\voxel_cube_sand.png" />
+    <Image Include="assets\textures\voxel_cube_snow.png" />
+    <Image Include="assets\textures\voxel_cube_stone.png" />
+    <Image Include="assets\textures\voxel_cube_stone_2.png" />
+    <Image Include="assets\textures\voxel_cube_water.png" />
+    <Image Include="assets\textures\wall.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
