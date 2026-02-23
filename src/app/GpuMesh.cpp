@@ -1,6 +1,6 @@
 #include "GpuMesh.h"
 #include <cstddef> // offsetof
-#include "../mesh/VoxelVertex.h"
+#include <../mesh/VoxelVertex.h>
 
 
 void GpuMesh::Upload(const std::vector<VoxelVertex>& verts)
@@ -26,7 +26,7 @@ void GpuMesh::Upload(const std::vector<VoxelVertex>& verts)
 
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VoxelVertex),
-        (void*)offsetof(VoxelVertex, uv));
+        (void*)offsetof(VoxelVertex, localUV));
 
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(VoxelVertex),
@@ -35,6 +35,11 @@ void GpuMesh::Upload(const std::vector<VoxelVertex>& verts)
     glEnableVertexAttribArray(3);
     glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(VoxelVertex),
         (void*)offsetof(VoxelVertex, layer));
+
+    // (col,row) tile coordinate into the 4x3 cube-net grid
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(VoxelVertex),
+        (void*)offsetof(VoxelVertex, tile));
 
     glBindVertexArray(0);
 

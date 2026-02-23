@@ -103,11 +103,12 @@ ChunkMeshData BuildChunkMeshFaceCulled(
                     auto& verts = (b == Block::Water) ? out.water : out.opaque;
 
                     auto push = [&](int ci) {
-                        VoxelVertex v;
+                        VoxelVertex v{}; // IMPORTANT: zero-init so new fields aren't garbage
                         v.pos = base + glm::vec3(f.c[ci]);
-                        v.uv = faceUV[ci];
+                        v.localUV = UV4[ci];                              // 0..1 local face UV
                         v.normal = f.normal;
                         v.layer = (float)BlockLayer(b);
+                        v.tile = glm::vec2((float)tile.x, (float)tile.y); // <-- REQUIRED
                         verts.push_back(v);
                         };
 
@@ -268,10 +269,18 @@ static void BuildGreedyPass(
 
                     glm::vec3 normal = FACES[faceIndex].normal;
                     float layer = (float)BlockLayer(faceBlock);
-
                     auto push = [&](int ci) {
-                        outVerts.push_back({ P[ci], faceUV[ci], normal, layer });
+                        VoxelVertex v{};
+                        v.pos = P[ci];
+                        v.localUV = UV4[ci]; // (stretches across the quad for now)
+                        v.normal = normal;
+                        v.layer = layer;
+                        v.tile = glm::vec2((float)tile.x, (float)tile.y);
+                        outVerts.push_back(v);
                         };
+                    //auto push = [&](int ci) {
+                    //    outVerts.push_back({ P[ci], faceUV[ci], normal, layer });
+                    //    };
 
                     push(0); push(1); push(2);
                     push(0); push(2); push(3);

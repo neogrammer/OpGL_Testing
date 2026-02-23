@@ -76,6 +76,7 @@ bool App::LoadAssets()
 
     voxelShader_->use();
     voxelShader_->setInt("texArray", 0);
+    voxelShader_->setVec2("uTexSize", (float)texW_, (float)texH_);
 
     return true;
 }
@@ -87,6 +88,10 @@ int App::Run()
     if (!LoadAssets()) return -1;
 
     camera_.Position = glm::vec3(0.0f, 0.0f, world_.planet.baseRadius + 20.0f);
+
+
+    
+
     world_.BuildPlanetOnce();
     while (!glfwWindowShouldClose(window_))
     {
