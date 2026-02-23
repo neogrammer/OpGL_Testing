@@ -22,6 +22,8 @@ struct Chunk {
 
     bool dirty = true;
     bool generated = false;
+    bool queuedGen = false;
+    bool queuedMesh = false;
 };
 
 inline int Idx(int x, int y, int z) {

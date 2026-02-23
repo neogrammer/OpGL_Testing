@@ -5,7 +5,7 @@
 #include <cmath>
 
 struct PlanetParams {
-    float baseRadius = 64.0f;  // voxels
+    float baseRadius = 4096.0f;  // voxels
     float maxHeight = 12.0f;
     float noiseFreq = 3.0f;
     int   octaves = 5;

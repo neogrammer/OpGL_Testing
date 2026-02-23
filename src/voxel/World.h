@@ -89,8 +89,9 @@ public:
          glBindVertexArray(0);
      }
 
-    void UpdateStreaming(glm::vec3 cameraPos);
+    void UpdateStreaming(glm::vec3 cameraPos, glm::vec3 cameraForward);
     void TickBuildQueues(int maxGenPerFrame, int maxMeshPerFrame);
+    void DrawWaterSorted(const glm::vec3& cameraPos);
 
 private:
     std::unordered_map<ChunkCoord, Chunk, ChunkCoordHash> chunks;
@@ -98,8 +99,12 @@ private:
     std::deque<ChunkCoord> genQueue;
     std::deque<ChunkCoord> meshQueue;
 
-    int renderDistance = 2;
+    int renderDistance = 7;
     int unloadDistance = 8;
+
+    ChunkCoord streamCamChunk{ 0,0,0 };
+    glm::vec3  streamCamForward{ 0,0,-1 }; // normalized
+    float      streamFrontBias = 8.0f;     // bigger = more “front-first”
 
     void FillChunkBlocks(Chunk& c);
     void BuildChunkMesh(Chunk& c);

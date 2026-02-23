@@ -6,9 +6,24 @@ flat in vec2 Tile;
 flat in vec3 Normal;
 flat in float TexLayer;
 
+// ADDED (must be output by voxel.vs)
+in vec3 WorldPos;
+
 uniform sampler2DArray texArray;
 uniform vec2 uTexSize; // full texture size of each layer (texW, texH)
 uniform vec3 lightDir = normalize(vec3(0.3, 0.8, 0.2));
+
+// Water / underwater uniforms
+uniform bool  uWaterPass = false;
+uniform float uSeaR = 0.0;
+
+uniform vec3  uUnderTintColor = vec3(0.25, 0.45, 1.0);
+
+// (optional knobs you can set from C++)
+uniform float uShallowDepth = 6.0;
+uniform float uDeepDepth    = 40.0;
+uniform float uShallowAlpha = 0.35;
+uniform float uDeepAlpha    = 0.80;
 
 vec2 CubeNetTiledUV(vec2 localUV, vec2 tileCR, vec3 n)
 {
@@ -32,9 +47,7 @@ vec2 CubeNetTiledUV(vec2 localUV, vec2 tileCR, vec3 n)
     // Repeat per block across greedy quads:
     vec2 uv = fract(localUV);
 
-    // This replicates your FACE_UV_MAP behavior:
-    // - Y faces swap
-    // - X/Z faces flip U
+    // Replicate FACE_UV_MAP behavior:
     bool yFace = abs(n.y) > 0.5;
     if (yFace) {
         uv = uv.yx;
@@ -45,15 +58,52 @@ vec2 CubeNetTiledUV(vec2 localUV, vec2 tileCR, vec3 n)
     return vec2(u0, v0) + uv * size;
 }
 
-void main() {
+void main()
+{
     vec2 uv = CubeNetTiledUV(LocalUV, Tile, Normal);
-
     vec4 tex = texture(texArray, vec3(uv, TexLayer));
 
     float ndl = max(dot(normalize(Normal), normalize(lightDir)), 0.0);
     float ambient = 0.25;
     vec3 lit = tex.rgb * (ambient + ndl * 0.75);
 
-    // If you want real water transparency, switch alpha back to tex.a
-    FragColor = vec4(lit, 1.0);
+    // --- Underwater tint & water appearance ---
+    float r = length(WorldPos);
+    bool underwater = (uSeaR > 0.0) && (r < uSeaR);
+
+    // depth below sea surface in world units
+    float depth = max(uSeaR - r, 0.0);
+
+    // 0 shallow -> 1 deep
+    float t = 0.0;
+    if (uDeepDepth > uShallowDepth)
+        t = clamp((depth - uShallowDepth) / (uDeepDepth - uShallowDepth), 0.0, 1.0);
+
+    // Tint anything underwater (terrain + water)
+    if (underwater)
+    {
+        // stronger tint as you go deeper
+        float tintT = clamp(depth / max(uDeepDepth, 0.001), 0.0, 1.0);
+        float strength = mix(0.20, 0.45, tintT);
+        lit = mix(lit, lit * uUnderTintColor, strength);
+    }
+
+    if (uWaterPass)
+    {
+        // Water color: shallow brighter, deep darker
+        vec3 shallowCol = vec3(0.18, 0.45, 0.95);
+        vec3 deepCol    = vec3(0.02, 0.10, 0.35);
+
+        vec3 waterCol = mix(shallowCol, deepCol, t);
+        lit = mix(lit, waterCol, 0.55);
+
+        // Water opacity: shallow clearer, deep darker
+        float outA = mix(uShallowAlpha, uDeepAlpha, t);
+
+        FragColor = vec4(lit, outA);
+    }
+    else
+    {
+        FragColor = vec4(lit, 1.0);
+    }
 }

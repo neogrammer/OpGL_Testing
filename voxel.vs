@@ -9,7 +9,7 @@ out vec2 LocalUV;
 flat out vec2 Tile;
 flat out vec3 Normal;
 flat out float TexLayer;
-
+out vec3 WorldPos;
 uniform mat4 view;
 uniform mat4 projection;
 
@@ -18,5 +18,6 @@ void main() {
     Tile = aTile;
     Normal = aNormal;
     TexLayer = aLayer;
+    WorldPos = aPos;
     gl_Position = projection * view * vec4(aPos, 1.0);
 }

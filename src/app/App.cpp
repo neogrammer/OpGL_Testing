@@ -60,10 +60,10 @@ bool App::LoadAssets()
 {
     voxelShader_ = std::make_unique<Shader>("voxel.vs", "voxel.fs");
 
-    world_.planet.baseRadius = 64.0f;
-    world_.planet.maxHeight = 12.0f;
-    world_.planet.noiseFreq = 3.0f;
-    world_.planet.octaves = 5;
+    world_.planet.baseRadius = 4096.0f;
+    world_.planet.maxHeight = 128.0f;
+    world_.planet.noiseFreq = 16.0f;
+    world_.planet.octaves = 16;
 
     blockTexArray_ = util::LoadTexture2DArray({
         "assets/textures/voxel_cube_grass.png",
@@ -92,7 +92,7 @@ int App::Run()
 
     
 
-    world_.BuildPlanetOnce();
+    //world_.BuildPlanetOnce();
     while (!glfwWindowShouldClose(window_))
     {
         float current = (float)glfwGetTime();
@@ -101,8 +101,8 @@ int App::Run()
 
         ProcessInput();
 
-        world_.UpdateStreaming(camera_.Position);
-        world_.TickBuildQueues(3, 2);
+        world_.UpdateStreaming(camera_.Position, camera_.Front);
+        world_.TickBuildQueues(2, 5);
 
         glClearColor(.1f, 0.38f, 0.33f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -112,22 +112,48 @@ int App::Run()
 
         glm::mat4 view = camera_.GetViewMatrix();
 
+       
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, blockTexArray_);
+
         voxelShader_->use();
         voxelShader_->setMat4("projection", projection);
         voxelShader_->setMat4("view", view);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, blockTexArray_);
 
-        glDisable(GL_BLEND);
-        glDepthMask(GL_TRUE);
+       // glDisable(GL_BLEND);
+       //glDepthMask(GL_TRUE);
+        // sea radius in world units (same units as WorldPos/aPos)
+        float seaR = world_.planet.baseRadius + world_.planet.seaLevelOffset;
+        voxelShader_->setFloat("uSeaR", seaR);
+        voxelShader_->setBool("uWaterPass", false);
+        // optional knobs (you can tweak later)
+        voxelShader_->setVec3("uUnderTintColor", glm::vec3(0.25f, 0.45f, 1.0f));
+        voxelShader_->setFloat("uShallowDepth", 6.0f);
+        voxelShader_->setFloat("uDeepDepth", 40.0f);
+        voxelShader_->setFloat("uShallowAlpha", 0.35f);
+        voxelShader_->setFloat("uDeepAlpha", 0.80f);
         world_.DrawOpaque();
+
+        
+
+        // Water pass
+        voxelShader_->setBool("uWaterPass", true);
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // see water from below
+        glDisable(GL_CULL_FACE);
+
+        // correct transparency
         glDepthMask(GL_FALSE);
-        world_.DrawWater();
+
+        // IMPORTANT: draw water back-to-front (see next patch)
+        world_.DrawWaterSorted(camera_.Position);
+
         glDepthMask(GL_TRUE);
+        glEnable(GL_CULL_FACE);
         glDisable(GL_BLEND);
 
         glfwSwapBuffers(window_);

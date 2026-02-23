@@ -2,6 +2,7 @@
 
 #include "../Mesher.h"
 #include "../mesh/VoxelVertex.h"
+#include <algorithm>
 
 
 static void UploadMesh(GLuint& vao, GLuint& vbo,
@@ -39,3 +40,31 @@ static void UploadMesh(GLuint& vao, GLuint& vbo,
     outCount = (int)verts.size();
 }
 
+void World::DrawWaterSorted(const glm::vec3& cameraPos)
+{
+    struct Item { float d2; Chunk* c; };
+
+    std::vector<Item> list;
+    list.reserve(chunks.size());
+
+    for (auto& [coord, chunk] : chunks)
+    {
+        if (chunk.water.count == 0) continue; // or whatever "empty" check you use
+
+        // chunk center in world space (assuming CHUNK_SIZE voxels)
+        glm::vec3 center =
+            glm::vec3(coord.x, coord.y, coord.z) * float(CHUNK_SIZE) +
+            glm::vec3(float(CHUNK_SIZE) * 0.5f);
+
+        glm::vec3 v = center - cameraPos;
+        float d2 = glm::dot(v, v);
+
+        list.push_back({ d2, &chunk });
+    }
+
+    std::sort(list.begin(), list.end(),
+        [](const Item& a, const Item& b) { return a.d2 > b.d2; }); // back-to-front
+
+    for (auto& it : list)
+        it.c->water.Draw(); // or whatever your draw call is
+}
