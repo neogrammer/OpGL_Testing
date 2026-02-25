@@ -51,6 +51,12 @@ void World::DrawWaterSorted(const glm::vec3& cameraPos)
     {
         if (chunk.water.count == 0) continue; // or whatever "empty" check you use
 
+        int ddx = coord.x - streamCamChunk.x;
+        int ddy = coord.y - streamCamChunk.y;
+        int ddz = coord.z - streamCamChunk.z;
+        int distCheby = std::max({ std::abs(ddx), std::abs(ddy), std::abs(ddz) });
+        if (distCheby > renderDistance) continue;
+
         // chunk center in world space (assuming CHUNK_SIZE voxels)
         glm::vec3 center =
             glm::vec3(coord.x, coord.y, coord.z) * float(CHUNK_SIZE) +

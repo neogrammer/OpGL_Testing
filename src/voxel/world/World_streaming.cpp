@@ -145,6 +145,51 @@ void World::TickBuildQueues(int maxGenPerFrame, int maxMeshPerFrame)
 {
     // 1) Generate blocks
   
+   // --- Debug: streaming stats + FPS (prints ~once per second) ---
+    static double statsT0 = glfwGetTime();
+    static int frames = 0;
+    frames++;
+
+    double now = glfwGetTime();
+    double dt = now - statsT0;
+
+    if (dt > 1.0)
+    {
+        // Average FPS over the last dt seconds
+        double fps = (dt > 0.0) ? (double(frames) / dt) : 0.0;
+
+        // reset for next interval
+        frames = 0;
+        statsT0 = now;
+
+        size_t loaded = chunks.size();
+        size_t generated = 0;
+        size_t meshed = 0;
+
+        for (auto& [coord, c] : chunks)
+        {
+            if (c.generated) generated++;
+            if (c.generated && !c.dirty) meshed++;
+        }
+
+        int side = 2 * renderDistance + 1;
+        size_t targetAtRest = (size_t)side * (size_t)side * (size_t)side;
+
+        int fpsRounded = (int)(fps + 0.5); // nice clean integer fps
+
+        std::cout
+            << "[Streaming] fps=" << fpsRounded
+            << " loaded=" << loaded
+            << " (target~" << targetAtRest << ")"
+            << " generated=" << generated
+            << " meshed=" << meshed
+            << " genQ=" << genQueue.size()
+            << " meshQ=" << meshQueue.size()
+            << " renderDistance=" << renderDistance
+            << " unloadDistance=" << unloadDistance
+            << "\n";
+    }
+
 
     for (int i = 0; i < maxGenPerFrame && !genQueue.empty(); i++)
     {

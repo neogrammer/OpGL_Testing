@@ -71,8 +71,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)src\app;$(ProjectDir)third_party\glm;$(ProjectDir)third_party\glad\include;C:\sdks\glfw-3.4\include;$(ProjectDir)third_party\assimp\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\JHARDEE\source\repos\neogrammer\OpGL_Testing\third_party\glfw\build\src\Debug;$(ProjectDir)third_party\assimp\lib\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)src\app;$(ProjectDir)third_party\glm;$(ProjectDir)third_party\glad\include;C:\tools\glfw\include;$(ProjectDir)third_party\assimp\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\tools\glfw\build\src\Debug;$(ProjectDir)third_party\assimp\lib\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>C:\VulkanSDK\1.3.296.0\Include\glm;C:\Users\jlhar\source\repos\D3\third_party\glad\include;C:\tools\glfw\include;C:\dev\Assimp\assimp\include;$(IncludePath)</IncludePath>
@@ -112,7 +112,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp23</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)third_party;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>

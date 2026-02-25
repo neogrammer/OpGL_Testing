@@ -7,6 +7,8 @@
 #include <glm.hpp>
 #include "Chunk.h"
 #include "Planet.h"
+#include <algorithm>
+#include <cstdlib>
 
 struct ChunkCoordHash {
     size_t operator()(const ChunkCoord& c) const noexcept {
@@ -76,18 +78,46 @@ public:
     void RebuildDirtyMeshes();     // mesh upload step
 
     //void Draw() const;
-    inline void DrawOpaque() const {
-        for (auto& [cc, c] : chunks) { c.opaque.Draw(); }
-        glBindVertexArray(0);
+    //inline void DrawOpaque() const {
+    //    for (auto& [cc, c] : chunks) { c.opaque.Draw(); }
+    //    glBindVertexArray(0);
 
+    //}
+
+    inline void DrawOpaque() const {
+        for (auto& [cc, c] : chunks)
+        {
+            int ddx = cc.x - streamCamChunk.x;
+            int ddy = cc.y - streamCamChunk.y;
+            int ddz = cc.z - streamCamChunk.z;
+            int distCheby = std::max({ std::abs(ddx), std::abs(ddy), std::abs(ddz) });
+
+            if (distCheby <= renderDistance)
+                c.opaque.Draw();
+        }
+        glBindVertexArray(0);
     }
 
 
 
-     inline void DrawWater() const {
-         for (auto& [cc, c] : chunks) c.water.Draw();
-         glBindVertexArray(0);
-     }
+     //inline void DrawWater() const {
+     //    for (auto& [cc, c] : chunks) c.water.Draw();
+     //    glBindVertexArray(0);
+     //}
+
+    inline void DrawWater() const {
+        for (auto& [cc, c] : chunks)
+        {
+            int ddx = cc.x - streamCamChunk.x;
+            int ddy = cc.y - streamCamChunk.y;
+            int ddz = cc.z - streamCamChunk.z;
+            int distCheby = std::max({ std::abs(ddx), std::abs(ddy), std::abs(ddz) });
+
+            if (distCheby <= renderDistance)
+                c.water.Draw();
+        }
+        glBindVertexArray(0);
+    }
 
     void UpdateStreaming(glm::vec3 cameraPos, glm::vec3 cameraForward);
     void TickBuildQueues(int maxGenPerFrame, int maxMeshPerFrame);
@@ -99,8 +129,8 @@ private:
     std::deque<ChunkCoord> genQueue;
     std::deque<ChunkCoord> meshQueue;
 
-    int renderDistance = 7;
-    int unloadDistance = 8;
+    int renderDistance = 5;
+    int unloadDistance = 6;
 
     ChunkCoord streamCamChunk{ 0,0,0 };
     glm::vec3  streamCamForward{ 0,0,-1 }; // normalized

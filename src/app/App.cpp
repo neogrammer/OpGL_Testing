@@ -9,7 +9,7 @@ bool App::InitWindow()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
+    //
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
@@ -62,10 +62,10 @@ bool App::LoadAssets()
 {
     voxelShader_ = std::make_unique<Shader>("voxel.vs", "voxel.fs");
     oceanShader_ = std::make_unique<Shader>("voxel.vs", "ocean.fs");
-    world_.planet.baseRadius = 4096.0f;
-    world_.planet.maxHeight = 128.0f;
-    world_.planet.noiseFreq = 16.0f;
-    world_.planet.octaves = 16;
+    world_.planet.baseRadius = 4096.f;
+    world_.planet.maxHeight = 64.0f;
+    world_.planet.noiseFreq = 4.0f;
+    world_.planet.octaves = 8;
 
     blockTexArray_ = util::LoadTexture2DArray({
         "assets/textures/voxel_cube_grass.png",
@@ -110,7 +110,7 @@ int App::Run()
         camera_.SetWorldUp(glm::normalize(camera_.Position));
 
         world_.UpdateStreaming(camera_.Position, camera_.Front);
-        world_.TickBuildQueues(4, 5);
+        world_.TickBuildQueues(2,4);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
