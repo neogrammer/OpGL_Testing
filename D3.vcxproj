@@ -195,6 +195,7 @@
     <Image Include="assets\textures\voxel_cube_snow.png" />
     <Image Include="assets\textures\voxel_cube_stone.png" />
     <Image Include="assets\textures\voxel_cube_stone_2.png" />
+    <Image Include="assets\textures\voxel_cube_water2.png" />
     <Image Include="assets\textures\voxel_cube_water.png" />
     <Image Include="assets\textures\wall.jpg" />
   </ItemGroup>

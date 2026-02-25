@@ -219,13 +219,16 @@
     <Image Include="assets\textures\voxel_cube_stone_2.png">
       <Filter>Resource Files\textures</Filter>
     </Image>
-    <Image Include="assets\textures\voxel_cube_water.png">
+    <Image Include="assets\textures\voxel_cube_water2.png">
       <Filter>Resource Files\textures</Filter>
     </Image>
     <Image Include="assets\textures\wall.jpg">
       <Filter>Resource Files\textures</Filter>
     </Image>
     <Image Include="assets\textures\voxel_cube_grass.png">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="assets\textures\voxel_cube_water.png">
       <Filter>Resource Files\textures</Filter>
     </Image>
   </ItemGroup>

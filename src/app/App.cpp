@@ -24,7 +24,7 @@ bool App::InitWindow()
     glfwMakeContextCurrent(window_);
    
     glfwSetWindowAspectRatio(window_, INIT_W, INIT_H);
-    glfwSetWindowPos(window_, 600, 300);
+    glfwSetWindowPos(window_, 150, 50);
 
     glfwSetWindowUserPointer(window_, this);
 
@@ -100,8 +100,13 @@ int App::Run()
         float current = (float)glfwGetTime();
         deltaTime_ = current - lastFrame_;
         lastFrame_ = current;
-
-        ProcessInput();
+        
+        // Lock camera "up" to planet radial up (prevents roll)
+        glm::vec3 radialUp = glm::normalize(camera_.Position);
+      
+        camera_.SetWorldUp(glm::normalize(camera_.Position));
+        ProcessInput(); 
+        camera_.SetWorldUp(glm::normalize(camera_.Position));
 
         world_.UpdateStreaming(camera_.Position, camera_.Front);
         world_.TickBuildQueues(2, 5);
@@ -330,6 +335,17 @@ void App::ProcessInput()
     if (glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS) camera_.ProcessKeyboard(BACKWARD, deltaTime_);
     if (glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS) camera_.ProcessKeyboard(LEFT, deltaTime_);
     if (glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS) camera_.ProcessKeyboard(RIGHT, deltaTime_);
+    // Toggle fly/FPS movement with F (press once)
+    if (glfwGetKey(window_, GLFW_KEY_F) == GLFW_PRESS) {
+        fHeld_ = true;
+    }
+    if (glfwGetKey(window_, GLFW_KEY_F) == GLFW_RELEASE) {
+        if (fHeld_) {
+            camera_.ToggleFlyMode();
+            std::cout << (camera_.IsFlyMode() ? "[Camera] Fly mode ON\n" : "[Camera] FPS mode ON\n");
+            fHeld_ = false;
+        }
+    }
 
     // Toggle capture with C (same logic you had)
     if (glfwGetKey(window_, GLFW_KEY_C) == GLFW_PRESS) {

@@ -38,6 +38,7 @@ private:
     double savedX_ = 0.0;
     double savedY_ = 0.0;
     bool cHeld_ = false;
+    bool fHeld_ = false;
 
     std::unique_ptr<Shader> voxelShader_;
     World world_;
