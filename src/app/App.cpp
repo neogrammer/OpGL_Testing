@@ -92,7 +92,8 @@ int App::Run()
     camera_.Position = glm::vec3(0.0f, 0.0f, world_.planet.baseRadius + 20.0f);
 
 
-    
+    glClearColor(.16f, .46f, 96.f, 1.0f);
+
 
     //world_.BuildPlanetOnce();
     while (!glfwWindowShouldClose(window_))
@@ -109,9 +110,8 @@ int App::Run()
         camera_.SetWorldUp(glm::normalize(camera_.Position));
 
         world_.UpdateStreaming(camera_.Position, camera_.Front);
-        world_.TickBuildQueues(2, 5);
+        world_.TickBuildQueues(4, 5);
 
-        glClearColor(.1f, 0.38f, 0.33f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glm::mat4 projection = glm::perspective(glm::radians(camera_.Zoom),
@@ -326,6 +326,111 @@ void App::OnScroll(double, double yoffset)
     camera_.ProcessMouseScroll((float)yoffset);
 }
 
+float App::ApplyDeadzone(float v, float dz)
+{
+    const float av = std::fabs(v);
+    if (av < dz) return 0.0f;
+
+    // Remap so movement starts smoothly after the deadzone.
+    const float sign = (v < 0.0f) ? -1.0f : 1.0f;
+    float scaled = (av - dz) / (1.0f - dz);
+    if (scaled > 1.0f) scaled = 1.0f;
+    return scaled * sign;
+}
+
+void App::ToggleFlyMode()
+{
+    camera_.ToggleFlyMode();
+    std::cout << (camera_.IsFlyMode() ? "[Camera] Fly mode ON\n" : "[Camera] FPS mode ON\n");
+}
+
+void App::ToggleMouseCapture()
+{
+    mouseCap_ = !mouseCap_;
+
+    if (mouseCap_)
+    {
+        // Save cursor position so we can restore it when unlocking.
+        glfwGetCursorPos(window_, &savedX_, &savedY_);
+        capSpot_ = false;
+        firstMouse_ = true;
+        glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+    else
+    {
+        glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        glfwSetCursorPos(window_, savedX_, savedY_);
+    }
+}
+
+void App::ProcessGamepadInput()
+{
+    if (!glfwJoystickPresent(gamepadId_)) return;
+    if (!glfwJoystickIsGamepad(gamepadId_)) return;
+
+    GLFWgamepadstate state{};
+    if (!glfwGetGamepadState(gamepadId_, &state)) return;
+
+    // B / Circle closes the app (edge-triggered)
+    if (state.buttons[GLFW_GAMEPAD_BUTTON_B] == GLFW_PRESS)
+    {
+        if (!gpBHeld_) glfwSetWindowShouldClose(window_, true);
+        gpBHeld_ = true;
+    }
+    else
+    {
+        gpBHeld_ = false;
+    }
+
+    // Left stick click (L3) toggles Fly/FPS movement (press once)
+    if (state.buttons[GLFW_GAMEPAD_BUTTON_LEFT_THUMB] == GLFW_PRESS)
+    {
+        gpL3Held_ = true;
+    }
+    else if (gpL3Held_)
+    {
+        ToggleFlyMode();
+        gpL3Held_ = false;
+    }
+
+    // Right stick click (R3) toggles camera look/capture (same as C)
+    if (state.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_THUMB] == GLFW_PRESS)
+    {
+        gpR3Held_ = true;
+    }
+    else if (gpR3Held_)
+    {
+        ToggleMouseCapture();
+        gpR3Held_ = false;
+    }
+
+    // Left stick = WASD
+    const float lx = ApplyDeadzone(state.axes[GLFW_GAMEPAD_AXIS_LEFT_X], gamepadDeadzone_);
+    const float ly = ApplyDeadzone(state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y], gamepadDeadzone_);
+
+    const float forward = -ly; // GLFW: up is typically negative
+    if (forward > 0.0f)      camera_.ProcessKeyboard(FORWARD,  deltaTime_ * forward);
+    else if (forward < 0.0f) camera_.ProcessKeyboard(BACKWARD, deltaTime_ * (-forward));
+
+    if (lx > 0.0f)      camera_.ProcessKeyboard(RIGHT, deltaTime_ * lx);
+    else if (lx < 0.0f) camera_.ProcessKeyboard(LEFT,  deltaTime_ * (-lx));
+
+    // Right stick = mouse look (only when "captured" / enabled)
+    if (mouseCap_)
+    {
+        const float rx = ApplyDeadzone(state.axes[GLFW_GAMEPAD_AXIS_RIGHT_X], gamepadDeadzone_);
+        const float ry = ApplyDeadzone(state.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y], gamepadDeadzone_);
+
+        // Convert stick [-1..1] -> degrees/sec -> ProcessMouseMovement units
+        const float sens = (camera_.MouseSensitivity != 0.0f) ? camera_.MouseSensitivity : 0.1f;
+        const float xoffset = (rx * gamepadLookDegPerSec_ * deltaTime_) / sens;
+        const float yoffset = (-ry * gamepadLookDegPerSec_ * deltaTime_) / sens;
+
+        if (xoffset != 0.0f || yoffset != 0.0f)
+            camera_.ProcessMouseMovement(xoffset, yoffset);
+    }
+}
+
 void App::ProcessInput()
 {
     if (glfwGetKey(window_, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -342,7 +447,7 @@ void App::ProcessInput()
     if (glfwGetKey(window_, GLFW_KEY_F) == GLFW_RELEASE) {
         if (fHeld_) {
             camera_.ToggleFlyMode();
-            std::cout << (camera_.IsFlyMode() ? "[Camera] Fly mode ON\n" : "[Camera] FPS mode ON\n");
+//            std::cout << (camera_.IsFlyMode() ? "[Camera] Fly mode ON\n" : "[Camera] FPS mode ON\n");
             fHeld_ = false;
         }
     }
@@ -352,18 +457,11 @@ void App::ProcessInput()
         cHeld_ = true;
     }
     if (glfwGetKey(window_, GLFW_KEY_C) == GLFW_RELEASE) {
-        if (cHeld_) {
-            mouseCap_ = !mouseCap_;
-            if (mouseCap_) {
-                capSpot_ = true;
-                firstMouse_ = true;
-                glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            }
-            else {
-                glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-                glfwSetCursorPos(window_, savedX_, savedY_);
-            }
-            cHeld_ = false;
+           if (cHeld_) {
+        ToggleMouseCapture();
+        cHeld_ = false;
+
         }
     }
+ProcessGamepadInput();
 }

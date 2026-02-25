@@ -14,6 +14,10 @@ public:
     std::unique_ptr<Shader> oceanShader_;
     GpuMesh oceanMesh_;
     bool oceanBuilt_ = false;
+    int gamepadId_=0;
+    bool gpBHeld_, gpL3Held_, gpR3Held_ = false;
+    float gamepadDeadzone_ = 0.3f;
+    float gamepadLookDegPerSec_ = 40.f;
 
     void BuildOceanMesh(float radius, int stacks = 96, int slices = 192);
 private:
@@ -50,7 +54,10 @@ private:
     bool InitGL();
     bool LoadAssets();
     void ProcessInput();
-
+    float ApplyDeadzone(float v, float dz);
+        void ToggleMouseCapture();
+        void ToggleFlyMode();
+    void ProcessGamepadInput();
     void OnResize(int w, int h);
     void OnMouse(double x, double y);
     void OnScroll(double xoff, double yoff);
