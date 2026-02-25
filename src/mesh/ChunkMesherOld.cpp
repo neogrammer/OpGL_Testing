@@ -200,50 +200,21 @@ static void BuildGreedyPass(
                             solidLocal.y >= 0 && solidLocal.y < CHUNK_SIZE &&
                             solidLocal.z >= 0 && solidLocal.z < CHUNK_SIZE)
                         {
-                            Block faceBlock  = solidIsA ? A : B;
+                            Block faceBlock = solidIsA ? A : B;
                             Block otherBlock = solidIsA ? B : A;
                             int faceIndex = axis * 2 + (solidIsA ? 0 : 1);
 
-                            //// Skip water faces against anything except AIR (prevents z-fighting with terrain)
-                            //if (faceBlock == Block::Water && otherBlock != Block::Air) {
-                            //    // leave cell empty
-                            //}
-                            //else {
-                            //    glm::ivec3 solidWorld = chunkBase + solidLocal;
-                            //    glm::ivec2 tile = TileForFaceOnVoxel(faceIndex, solidWorld);
-
-                            //    cell.empty = false;
-                            //    cell.key = MakeGreedyKey(faceBlock, faceIndex, tile);
-                            //}
-
-                            if (faceBlock == Block::Water)
-                            {
-                                // Only render water where it touches AIR
-                                if (otherBlock == Block::Air)
-                                {
-                                    glm::ivec3 solidWorld = chunkBase + solidLocal;
-
-                                    // Only keep the voxel's "outward" face so we don't create step-wall stacks.
-                                    int topFi = DominantTopFaceIndex(solidWorld);
-                                    if (faceIndex == topFi)
-                                    {
-                                        // Force uniform water tile (prevents the "two blues" issue)
-                                        glm::ivec2 tile = TILE_TOP;
-
-                                        cell.empty = false;
-                                        cell.key = MakeGreedyKey(faceBlock, faceIndex, tile);
-                                    }
-                                }
+                            // Skip water faces against anything except AIR (prevents z-fighting with terrain)
+                            if (faceBlock == Block::Water && otherBlock != Block::Air) {
+                                // leave cell empty
                             }
-                            else
-                            {
+                            else {
                                 glm::ivec3 solidWorld = chunkBase + solidLocal;
                                 glm::ivec2 tile = TileForFaceOnVoxel(faceIndex, solidWorld);
 
                                 cell.empty = false;
                                 cell.key = MakeGreedyKey(faceBlock, faceIndex, tile);
                             }
-
                         }
                     }
 

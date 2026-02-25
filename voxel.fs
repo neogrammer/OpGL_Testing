@@ -12,6 +12,9 @@ in vec3 WorldPos;
 uniform sampler2DArray texArray;
 uniform vec2 uTexSize; // full texture size of each layer (texW, texH)
 uniform vec3 lightDir = normalize(vec3(0.3, 0.8, 0.2));
+uniform vec3  uCameraPos;
+uniform float uWaterAbsorb = 0.015;   // start here
+uniform float uFresnelBoost = 0.35;   // start here
 
 // Water / underwater uniforms
 uniform bool  uWaterPass = false;
@@ -24,6 +27,8 @@ uniform float uShallowDepth = 6.0;
 uniform float uDeepDepth    = 40.0;
 uniform float uShallowAlpha = 0.35;
 uniform float uDeepAlpha    = 0.80;
+
+
 
 vec2 CubeNetTiledUV(vec2 localUV, vec2 tileCR, vec3 n)
 {
@@ -63,16 +68,47 @@ void main()
     vec2 uv = CubeNetTiledUV(LocalUV, Tile, Normal);
     vec4 tex = texture(texArray, vec3(uv, TexLayer));
 
-    float ndl = max(dot(normalize(Normal), normalize(lightDir)), 0.0);
-    float ambient = 0.25;
-    vec3 lit = tex.rgb * (ambient + ndl * 0.75);
+    //float ndl = max(dot(normalize(Normal), normalize(lightDir)), 0.0);
+    //float ambient = 0.25;
+    //vec3 lit = tex.rgb * (ambient + ndl * 0.75);
+    vec3 lit = tex.rgb; // ambient-only lighting (uniform)
 
-    // --- Underwater tint & water appearance ---
-    float r = length(WorldPos);
-    bool underwater = (uSeaR > 0.0) && (r < uSeaR);
+    //// --- Underwater tint & water appearance ---
+    //float r = length(WorldPos);
+    //bool underwater = (uSeaR > 0.0) && (r < uSeaR);
 
-    // depth below sea surface in world units
-    float depth = max(uSeaR - r, 0.0);
+    //// depth below sea surface in world units
+    //float depth = max(uSeaR - r, 0.0);
+//    float rFrag = length(WorldPos);
+//bool underwater = (uSeaR > 0.0) && (rFrag < uSeaR);
+
+//// For water shading, sample half a voxel INSIDE the water block so the whole face
+//// behaves consistently (prevents the “half above/half below” ring look).
+//float rForDepth = rFrag;
+//if (uWaterPass) {
+//    rForDepth = length(WorldPos - Normal * 0.5);
+//}
+
+//float depth = max(uSeaR - rForDepth, 0.0);
+
+float rFrag = length(WorldPos);
+float rCam  = length(uCameraPos);
+
+bool cameraUnder = (uSeaR > 0.0) && (rCam  < uSeaR);
+bool fragUnder   = (uSeaR > 0.0) && (rFrag < uSeaR);
+
+// When the camera is underwater, keep shading consistent (prevents rings).
+bool underwater = cameraUnder || fragUnder;
+
+// Depth below sea surface.
+// For water, sample half a voxel INSIDE the block in the RADIAL direction.
+float rForDepth = rFrag;
+if (uWaterPass) {
+    vec3 outDir = (rFrag > 1e-5) ? (WorldPos / rFrag) : vec3(0.0, 1.0, 0.0);
+    rForDepth = length(WorldPos - outDir * 0.5);
+}
+
+float depth = max(uSeaR - rForDepth, 0.0);
 
     // 0 shallow -> 1 deep
     float t = 0.0;
@@ -90,6 +126,18 @@ void main()
 
     if (uWaterPass)
     {
+//        if (!gl_FrontFacing) {
+//    vec3 outDir = normalize(WorldPos);
+//    float align = abs(dot(normalize(Normal), outDir)); // 1 = radial-ish, 0 = tangent-ish
+
+//    // Radial faces are the "real surface" we want visible from below.
+//    // Tangent faces are step-walls we want to hide.
+//    float keep = smoothstep(0.55, 0.80, align);
+
+//    if (keep < 0.02) discard;
+//    // or: outA *= keep; (if you prefer fade instead of discard)
+//}
+
         // Water color: shallow brighter, deep darker
         vec3 shallowCol = vec3(0.18, 0.45, 0.95);
         vec3 deepCol    = vec3(0.02, 0.10, 0.35);
@@ -99,6 +147,18 @@ void main()
 
         // Water opacity: shallow clearer, deep darker
         float outA = mix(uShallowAlpha, uDeepAlpha, t);
+
+        vec3 V = normalize(uCameraPos - WorldPos);
+//float ndv = clamp(dot(normalize(Normal), V), 0.0, 1.0);
+//float fres = pow(1.0 - ndv, 5.0);   // 0 front-on, 1 grazing
+
+//float dist = length(uCameraPos - WorldPos);
+//float absorb = 1.0 - exp(-uWaterAbsorb * dist);
+
+//// existing outA from shallow/deep
+//outA = clamp(outA + absorb * 0.70 + fres * uFresnelBoost, 0.0, 0.98);
+
+outA = clamp(outA, 0.0, 0.98);
 
         FragColor = vec4(lit, outA);
     }

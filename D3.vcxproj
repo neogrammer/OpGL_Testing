@@ -179,16 +179,7 @@
     <ClInclude Include="third_party\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="4.2.texture.fs" />
-    <None Include="4.2.texture.vs" />
-    <None Include="5.1.transform.fs" />
-    <None Include="5.1.transform.vs" />
-    <None Include="6.3.coordinate_systems.fs" />
-    <None Include="6.3.coordinate_systems.vs" />
-    <None Include="7.4.camera.fs" />
-    <None Include="7.4.camera.vs" />
-    <None Include="normals.fs" />
-    <None Include="normals.vs" />
+    <None Include="ocean.fs" />
     <None Include="voxel.fs" />
     <None Include="voxel.vs" />
   </ItemGroup>

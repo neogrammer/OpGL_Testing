@@ -5,8 +5,9 @@
 bool App::InitWindow()
 {
     glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 #ifdef __APPLE__
@@ -21,6 +22,7 @@ bool App::InitWindow()
     }
 
     glfwMakeContextCurrent(window_);
+   
     glfwSetWindowAspectRatio(window_, INIT_W, INIT_H);
     glfwSetWindowPos(window_, 600, 300);
 
@@ -47,7 +49,7 @@ bool App::InitGL()
         std::cout << "Failed to initialize GLAD\n";
         return false;
     }
-
+    glEnable(GL_MULTISAMPLE);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -59,7 +61,7 @@ bool App::InitGL()
 bool App::LoadAssets()
 {
     voxelShader_ = std::make_unique<Shader>("voxel.vs", "voxel.fs");
-
+    oceanShader_ = std::make_unique<Shader>("voxel.vs", "ocean.fs");
     world_.planet.baseRadius = 4096.0f;
     world_.planet.maxHeight = 128.0f;
     world_.planet.noiseFreq = 16.0f;
@@ -112,15 +114,17 @@ int App::Run()
 
         glm::mat4 view = camera_.GetViewMatrix();
 
-       
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, blockTexArray_);
 
+       
         voxelShader_->use();
         voxelShader_->setMat4("projection", projection);
         voxelShader_->setMat4("view", view);
 
-
+        voxelShader_->setVec3("uCameraPos", camera_.Position);
+        voxelShader_->setFloat("uWaterAbsorb", 0.015f);
+        voxelShader_->setFloat("uFresnelBoost", 0.35f);
        // glDisable(GL_BLEND);
        //glDepthMask(GL_TRUE);
         // sea radius in world units (same units as WorldPos/aPos)
@@ -138,23 +142,76 @@ int App::Run()
         
 
         // Water pass
-        voxelShader_->setBool("uWaterPass", true);
+        //voxelShader_->setBool("uWaterPass", true);
 
+        //glEnable(GL_BLEND);
+        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        //// see water from below
+        //glDisable(GL_CULL_FACE);
+
+        //// correct transparency
+        //glDepthMask(GL_FALSE);
+
+        //// IMPORTANT: draw water back-to-front (see next patch)
+        //world_.DrawWaterSorted(camera_.Position);
+
+        //glDepthMask(GL_TRUE);
+        //glEnable(GL_CULL_FACE);
+        //glDisable(GL_BLEND);
+
+        //// Water pass
+        //voxelShader_->setBool("uWaterPass", true);
+
+        //// Two-pass "single-layer water": prevents stacked water faces from accumulating
+        //glDisable(GL_CULL_FACE);
+
+        //// 1) Depth prepass: write nearest water depth only
+        //glDisable(GL_BLEND);
+        //glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+        //glDepthMask(GL_TRUE);
+        //glDepthFunc(GL_LESS); // default
+        //world_.DrawWaterSorted(camera_.Position);
+
+        //// 2) Color pass: only draw fragments that match the nearest depth
+        //glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        //glDepthMask(GL_FALSE);
+        //glDepthFunc(GL_LEQUAL); // if water disappears on some GPUs, try GL_LEQUAL
+        //glEnable(GL_BLEND);
+        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //world_.DrawWaterSorted(camera_.Position);
+
+        //// Restore state
+        //glDepthFunc(GL_LESS);
+        //glDepthMask(GL_TRUE);
+        //glEnable(GL_CULL_FACE);
+        //glDisable(GL_BLEND);
+
+        // --- Ocean surface (radial shell) ---
+        
+        if (!oceanBuilt_) BuildOceanMesh(seaR, 96, 192);
+
+        oceanShader_->use();
+        oceanShader_->setMat4("projection", projection);
+        oceanShader_->setMat4("view", view);
+        oceanShader_->setVec2("uTexSize", (float)texW_, (float)texH_);
+        oceanShader_->setFloat("uOceanTileWorld", 8.0f); // tweak: bigger = less repeating
+        oceanShader_->setFloat("uOceanAlpha", 0.55f);
+        oceanShader_->setFloat("uWaterLayer", 5.0f);
+
+        // same texture array bound already
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        // see water from below
         glDisable(GL_CULL_FACE);
-
-        // correct transparency
         glDepthMask(GL_FALSE);
-
-        // IMPORTANT: draw water back-to-front (see next patch)
-        world_.DrawWaterSorted(camera_.Position);
-
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset(-.5f, -.5f);
+        oceanMesh_.Draw();
+        glDisable(GL_POLYGON_OFFSET_FILL);
         glDepthMask(GL_TRUE);
         glEnable(GL_CULL_FACE);
         glDisable(GL_BLEND);
+
 
         glfwSwapBuffers(window_);
         glfwPollEvents();
@@ -162,6 +219,66 @@ int App::Run()
 
     glfwTerminate();
     return 0;
+}
+void App::BuildOceanMesh(float R, int stacks, int slices)
+{
+    std::vector<VoxelVertex> v;
+    v.reserve(stacks * slices * 6);
+
+    auto pushTri = [&](glm::vec3 p0, glm::vec3 p1, glm::vec3 p2)
+        {
+            auto mk = [&](glm::vec3 p)
+                {
+                    VoxelVertex vv{};
+                    vv.pos = p;
+                    vv.normal = glm::normalize(p);
+                    vv.localUV = glm::vec2(0.0f);         // unused by ocean.fs
+                    vv.layer = 5.0f;                      // water layer in your array (index 5)
+                    vv.tile = glm::vec2(1.0f, 2.0f);     // TILE_TOP (col,row)
+                    return vv;
+                };
+            v.push_back(mk(p0));
+            v.push_back(mk(p1));
+            v.push_back(mk(p2));
+        };
+
+    for (int i = 0; i < stacks; ++i)
+    {
+        float v0 = (float)i / (float)stacks;
+        float v1 = (float)(i + 1) / (float)stacks;
+
+        float th0 = v0 * glm::pi<float>();
+        float th1 = v1 * glm::pi<float>();
+
+        for (int j = 0; j < slices; ++j)
+        {
+            float u0 = (float)j / (float)slices;
+            float u1 = (float)(j + 1) / (float)slices;
+
+            float ph0 = u0 * glm::two_pi<float>();
+            float ph1 = u1 * glm::two_pi<float>();
+
+            auto sph = [&](float th, float ph)
+                {
+                    float x = sin(th) * cos(ph);
+                    float y = cos(th);
+                    float z = sin(th) * sin(ph);
+                    return glm::vec3(x, y, z) * R;
+                };
+
+            glm::vec3 p00 = sph(th0, ph0);
+            glm::vec3 p10 = sph(th1, ph0);
+            glm::vec3 p01 = sph(th0, ph1);
+            glm::vec3 p11 = sph(th1, ph1);
+
+            // two triangles
+            pushTri(p00, p10, p11);
+            pushTri(p00, p11, p01);
+        }
+    }
+
+    oceanMesh_.Upload(v);
+    oceanBuilt_ = true;
 }
 
 void App::OnResize(int w, int h)

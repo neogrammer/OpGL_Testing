@@ -72,7 +72,7 @@ GLuint util::LoadTexture2DArray(const std::vector<std::string>& paths, int& outW
     glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
     glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_ANISOTROPY_EXT, std::min(8.0f, maxAniso));
 #endif
-    glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_LOD_BIAS, -0.25f);
+    glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_LOD_BIAS, 0.0f);
 
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 

@@ -6,10 +6,16 @@
 #include <learnopengl/camera.h>
 #include "src/voxel/World.h"
 
+#include <../src/app/GpuMesh.h>
+
 class App {
 public:
     int Run();
+    std::unique_ptr<Shader> oceanShader_;
+    GpuMesh oceanMesh_;
+    bool oceanBuilt_ = false;
 
+    void BuildOceanMesh(float radius, int stacks = 96, int slices = 192);
 private:
     static constexpr int INIT_W = 2560;
     static constexpr int INIT_H = 1600;
