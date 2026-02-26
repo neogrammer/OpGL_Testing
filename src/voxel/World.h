@@ -129,8 +129,8 @@ private:
     std::deque<ChunkCoord> genQueue;
     std::deque<ChunkCoord> meshQueue;
 
-    int renderDistance = 5;
-    int unloadDistance = 6;
+    int renderDistance = 7;
+    int unloadDistance = 8;
 
     ChunkCoord streamCamChunk{ 0,0,0 };
     glm::vec3  streamCamForward{ 0,0,-1 }; // normalized

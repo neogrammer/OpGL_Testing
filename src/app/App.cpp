@@ -64,8 +64,8 @@ bool App::LoadAssets()
     oceanShader_ = std::make_unique<Shader>("voxel.vs", "ocean.fs");
     world_.planet.baseRadius = 4096.f;
     world_.planet.maxHeight = 64.0f;
-    world_.planet.noiseFreq = 4.0f;
-    world_.planet.octaves = 8;
+    world_.planet.noiseFreq = 16.0f;
+    world_.planet.octaves = 2;
 
     blockTexArray_ = util::LoadTexture2DArray({
         "assets/textures/voxel_cube_grass.png",
@@ -304,8 +304,11 @@ void App::OnMouse(double xposIn, double yposIn)
         firstMouse_ = false;
     }
 
-    float xoffset = xpos - lastX_;
+    float xoffset  = xpos - lastX_;
     float yoffset = lastY_ - ypos;
+    xoffset *= 1000.f;
+    yoffset *= 1000.f;
+
 
     lastX_ = xpos;
     lastY_ = ypos;
