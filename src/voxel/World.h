@@ -193,7 +193,7 @@ private:
     std::deque<ChunkCoord> genQueue;
     std::deque<ChunkCoord> meshQueue;
 
-    int renderDistance = 7;
+    int renderDistance = 5;
     int loadDistance = renderDistance; // streaming/build distance
     int unloadDistance = 8;
 
@@ -201,7 +201,7 @@ private:
 
     ChunkCoord streamCamChunk{ 0,0,0 };
     glm::vec3  streamCamForward{ 0,0,-1 }; // normalized
-    float      streamFrontBias = 8.0f;     // bigger = more “front-first”
+    float      streamFrontBias = 12.0f;     // bigger = more “front-first”
 
     void FillChunkBlocks(Chunk& c);
     void BuildChunkMesh(Chunk& c);
