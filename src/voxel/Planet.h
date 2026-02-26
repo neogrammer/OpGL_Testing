@@ -7,7 +7,7 @@
 struct PlanetParams {
     float baseRadius = 4096.0f;  // voxels
     float maxHeight = 12.0f;
-    float noiseFreq = 3.0f;
+    float noiseFreq = 8.0f;
     int   octaves = 5;
 
     float seaLevelOffset = -2.f;

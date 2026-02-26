@@ -36,32 +36,32 @@
     <Filter Include="Resource Files\shaders">
       <UniqueIdentifier>{afb6768a-da9b-4209-9619-d8e553a64ed1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\Header Files">
+    <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files\Header Files\third_party">
+    <Filter Include="Header Files\third_party">
       <UniqueIdentifier>{233dd09c-22e4-4c68-a03b-b9950fbbaf20}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\Header Files\third_party\glad">
+    <Filter Include="Header Files\third_party\glad">
       <UniqueIdentifier>{8ae82e80-eae5-499b-940c-6f84ddab6061}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\Header Files\third_party\KHR">
+    <Filter Include="Header Files\third_party\KHR">
       <UniqueIdentifier>{bfa03b2a-73d9-495e-b767-c639853f4811}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\Header Files\voxel">
+    <Filter Include="Header Files\voxel">
       <UniqueIdentifier>{9879e064-554a-4d71-869a-f459a40f5116}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\Header Files\voxel\mesh">
+    <Filter Include="Header Files\voxel\mesh">
       <UniqueIdentifier>{fc0506e2-0c40-4a73-a447-25b3459c8cd6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\Header Files\voxel\world">
+    <Filter Include="Header Files\voxel\world">
       <UniqueIdentifier>{5e195802-c7e8-468f-aedd-52aa0ab1212d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\Header Files\utility">
+    <Filter Include="Header Files\utility">
       <UniqueIdentifier>{00be91b5-4131-4aed-bf87-051713cef4a1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\Header Files\program">
+    <Filter Include="Header Files\program">
       <UniqueIdentifier>{e9839667-fab4-415d-8d92-fc25a073f505}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -108,73 +108,73 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="third_party\glad\include\KHR\khrplatform.h">
-      <Filter>Resource Files\Header Files\third_party\KHR</Filter>
+      <Filter>Header Files\third_party\KHR</Filter>
     </ClInclude>
     <ClInclude Include="third_party\glad\include\glad\glad.h">
-      <Filter>Resource Files\Header Files\third_party\glad</Filter>
+      <Filter>Header Files\third_party\glad</Filter>
     </ClInclude>
     <ClInclude Include="src\voxel\Chunk.h">
-      <Filter>Resource Files\Header Files\voxel</Filter>
+      <Filter>Header Files\voxel</Filter>
     </ClInclude>
     <ClInclude Include="src\voxel\Noise.h">
-      <Filter>Resource Files\Header Files\voxel</Filter>
+      <Filter>Header Files\voxel</Filter>
     </ClInclude>
     <ClInclude Include="src\voxel\Planet.h">
-      <Filter>Resource Files\Header Files\voxel</Filter>
+      <Filter>Header Files\voxel</Filter>
     </ClInclude>
     <ClInclude Include="src\voxel\Voxel.h">
-      <Filter>Resource Files\Header Files\voxel</Filter>
+      <Filter>Header Files\voxel</Filter>
     </ClInclude>
     <ClInclude Include="src\utility\TextureUtils.h">
-      <Filter>Resource Files\Header Files\utility</Filter>
+      <Filter>Header Files\utility</Filter>
     </ClInclude>
     <ClInclude Include="third_party\stb_image.h">
-      <Filter>Resource Files\Header Files\third_party</Filter>
+      <Filter>Header Files\third_party</Filter>
     </ClInclude>
     <ClInclude Include="cube_renderer.h">
-      <Filter>Resource Files\Header Files\utility</Filter>
+      <Filter>Header Files\utility</Filter>
     </ClInclude>
     <ClInclude Include="src\voxel\Mesher.h">
-      <Filter>Resource Files\Header Files\voxel\mesh</Filter>
+      <Filter>Header Files\voxel\mesh</Filter>
     </ClInclude>
     <ClInclude Include="src\mesh\ChunkMesher.h">
-      <Filter>Resource Files\Header Files\voxel\mesh</Filter>
+      <Filter>Header Files\voxel\mesh</Filter>
     </ClInclude>
     <ClInclude Include="src\app\GpuMesh.h">
-      <Filter>Resource Files\Header Files\voxel\mesh</Filter>
+      <Filter>Header Files\voxel\mesh</Filter>
     </ClInclude>
     <ClInclude Include="src\mesh\VoxelVertex.h">
-      <Filter>Resource Files\Header Files\voxel</Filter>
+      <Filter>Header Files\voxel</Filter>
     </ClInclude>
     <ClInclude Include="src\m3.h">
-      <Filter>Resource Files\Header Files\utility</Filter>
+      <Filter>Header Files\utility</Filter>
     </ClInclude>
     <ClInclude Include="src\m4.h">
-      <Filter>Resource Files\Header Files\utility</Filter>
+      <Filter>Header Files\utility</Filter>
     </ClInclude>
     <ClInclude Include="src\v2.h">
-      <Filter>Resource Files\Header Files\utility</Filter>
+      <Filter>Header Files\utility</Filter>
     </ClInclude>
     <ClInclude Include="src\v3.h">
-      <Filter>Resource Files\Header Files\utility</Filter>
+      <Filter>Header Files\utility</Filter>
     </ClInclude>
     <ClInclude Include="src\v4.h">
-      <Filter>Resource Files\Header Files\utility</Filter>
+      <Filter>Header Files\utility</Filter>
     </ClInclude>
     <ClInclude Include="src\app\App.h">
-      <Filter>Resource Files\Header Files\program</Filter>
+      <Filter>Header Files\program</Filter>
     </ClInclude>
     <ClInclude Include="src\voxel\Block.h">
-      <Filter>Resource Files\Header Files\voxel</Filter>
+      <Filter>Header Files\voxel</Filter>
     </ClInclude>
     <ClInclude Include="src\voxel\World.h">
-      <Filter>Resource Files\Header Files\voxel\world</Filter>
+      <Filter>Header Files\voxel\world</Filter>
     </ClInclude>
     <ClInclude Include="learnopengl\camera.h">
-      <Filter>Resource Files\Header Files\utility</Filter>
+      <Filter>Header Files\utility</Filter>
     </ClInclude>
     <ClInclude Include="learnopengl\shader_s.h">
-      <Filter>Resource Files\Header Files\utility</Filter>
+      <Filter>Header Files\utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

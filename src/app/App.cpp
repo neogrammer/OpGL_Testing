@@ -1,5 +1,7 @@
 #include "App.h"
 #include <iostream>
+#include <algorithm>
+#include <cmath>
 #include <src/utility/TextureUtils.h>
 
 bool App::InitWindow()
@@ -63,9 +65,10 @@ bool App::LoadAssets()
     voxelShader_ = std::make_unique<Shader>("voxel.vs", "voxel.fs");
     oceanShader_ = std::make_unique<Shader>("voxel.vs", "ocean.fs");
     world_.planet.baseRadius = 4096.f;
-    world_.planet.maxHeight = 64.0f;
-    world_.planet.noiseFreq = 16.0f;
-    world_.planet.octaves = 2;
+    world_.planet.maxHeight = 12.0f;
+    world_.planet.noiseFreq = 3.0f;
+    world_.planet.octaves = 5;
+    world_.planet.seaLevelOffset = -2.0f;
 
     blockTexArray_ = util::LoadTexture2DArray({
         "assets/textures/voxel_cube_grass.png",
@@ -89,7 +92,9 @@ int App::Run()
     if (!InitGL()) return -1;
     if (!LoadAssets()) return -1;
 
+    // Start somewhere above the planet, then snap down to tiny-player eye height.
     camera_.Position = glm::vec3(0.0f, 0.0f, world_.planet.baseRadius + 20.0f);
+    SnapCameraToSurface(spawnAboveSea_);
 
 
     glClearColor(.16f, .46f, 96.f, 1.0f);
@@ -103,19 +108,55 @@ int App::Run()
         lastFrame_ = current;
         
         // Lock camera "up" to planet radial up (prevents roll)
-        glm::vec3 radialUp = glm::normalize(camera_.Position);
-      
         camera_.SetWorldUp(glm::normalize(camera_.Position));
-        ProcessInput(); 
+        ProcessInput();
+
+        // FPS mode = locked to the surface, with a very low (tiny-player) eye height
+        if (!camera_.IsFlyMode())
+            SnapCameraToSurface(false);
+
         camera_.SetWorldUp(glm::normalize(camera_.Position));
 
         world_.UpdateStreaming(camera_.Position, camera_.Front);
-        world_.TickBuildQueues(2,4);
+
+        if (loading_)
+        {
+            world_.TickBuildQueues(loadGenPerFrame_, loadMeshPerFrame_);
+
+            World::StreamStats st = world_.GetStreamStats();
+            float p = (st.target > 0) ? (float(st.meshed) / float(st.target)) : 1.0f;
+            int pct = int(p * 100.0f + 0.5f);
+
+            double t = glfwGetTime();
+            if (t - loadingTitleT0_ > 0.10)
+            {
+                char title[256];
+                std::snprintf(title, sizeof(title),"VoxelPlanet - Loading %d%% (meshed %zu/%zu) [genQ=%zu meshQ=%zu]",  pct, st.meshed, st.target, st.genQ, st.meshQ);
+                glfwSetWindowTitle(window_, title);
+                loadingTitleT0_ = t;
+            }
+
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glfwSwapBuffers(window_);
+            glfwPollEvents();
+
+            if (world_.IsStreamReady())
+            {
+                loading_ = false;
+                glfwSetWindowTitle(window_, "VoxelPlanet");
+                glClearColor(.16f, .46f, 96.f, 1.0f); // your original
+            }
+
+            continue; // IMPORTANT: skip normal rendering until ready
+        }
+        world_.TickBuildQueues(playGenPerFrame_, playMeshPerFrame_);
+        //world_.TickBuildQueues(2,4);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glm::mat4 projection = glm::perspective(glm::radians(camera_.Zoom),
-            (float)width_ / (float)height_, 0.1f, 2000.0f);
+            (float)width_ / (float)height_, 0.03f, 2000.0f);
 
         glm::mat4 view = camera_.GetViewMatrix();
 
@@ -128,6 +169,20 @@ int App::Run()
         voxelShader_->setMat4("view", view);
 
         voxelShader_->setVec3("uCameraPos", camera_.Position);
+        
+        // --- Fog (end fog slightly before the last visible chunk ring) ---
+        const float chunkW = float(CHUNK_SIZE);
+        const float SQRT3 = 1.7320508f;
+
+        // If you want fog to finish ~half a chunk before the edge, use -0.5f.
+        // Your earlier snippet used -1.0f; both are fine, this one hides pop-in better.
+        float fogEnd = float(world_.GetRenderDistance() - 0.5f) * chunkW * SQRT3;
+        float fogStart = fogEnd - 2.0f * chunkW * SQRT3; // fade across ~2 chunks
+
+        voxelShader_->setFloat("uFogStart", fogStart);
+        voxelShader_->setFloat("uFogEnd", fogEnd);
+        voxelShader_->setVec3("uFogColor", glm::vec3(0.16f, 0.46f, 1.0f)); // match your sky
+        
         voxelShader_->setFloat("uWaterAbsorb", 0.015f);
         voxelShader_->setFloat("uFresnelBoost", 0.35f);
        // glDisable(GL_BLEND);
@@ -142,6 +197,13 @@ int App::Run()
         voxelShader_->setFloat("uDeepDepth", 40.0f);
         voxelShader_->setFloat("uShallowAlpha", 0.35f);
         voxelShader_->setFloat("uDeepAlpha", 0.80f);
+
+        // Fog: fade out ~0.5 chunk before the streaming boundary to hide pop-in
+       fogEnd = (world_.GetRenderDistance() - 0.5f) * float(CHUNK_SIZE);
+        fogStart = (world_.GetRenderDistance() - 1.5f) * float(CHUNK_SIZE);
+        voxelShader_->setFloat("uFogStart", fogStart);
+        voxelShader_->setFloat("uFogEnd", fogEnd);
+
         world_.DrawOpaque();
 
         
@@ -304,11 +366,8 @@ void App::OnMouse(double xposIn, double yposIn)
         firstMouse_ = false;
     }
 
-    float xoffset  = xpos - lastX_;
+    float xoffset = xpos - lastX_;
     float yoffset = lastY_ - ypos;
-    xoffset *= 1000.f;
-    yoffset *= 1000.f;
-
 
     lastX_ = xpos;
     lastY_ = ypos;
@@ -344,7 +403,32 @@ float App::ApplyDeadzone(float v, float dz)
 void App::ToggleFlyMode()
 {
     camera_.ToggleFlyMode();
+
+    // When dropping back to FPS mode, snap to the terrain surface at a tiny-player eye height.
+    if (!camera_.IsFlyMode())
+        SnapCameraToSurface(false);
+
     std::cout << (camera_.IsFlyMode() ? "[Camera] Fly mode ON\n" : "[Camera] FPS mode ON\n");
+}
+
+void App::SnapCameraToSurface(bool keepAboveSea)
+{
+    float len = glm::length(camera_.Position);
+    if (len < 1e-5f) return;
+
+    glm::vec3 dir = camera_.Position / len;
+
+    // Terrain surface radius at this direction (continuous surface, matches SamplePlanet height).
+    float surfaceR = world_.planet.baseRadius + HeightOnSphere(dir, world_.planet);
+
+    float baseR = surfaceR;
+    if (keepAboveSea)
+    {
+        float seaR = world_.planet.baseRadius + world_.planet.seaLevelOffset;
+        baseR = std::max(baseR, seaR);
+    }
+
+    camera_.Position = dir * (baseR + playerEyeHeight_);
 }
 
 void App::ToggleMouseCapture()
@@ -385,6 +469,10 @@ void App::ProcessGamepadInput()
         gpBHeld_ = false;
     }
 
+    
+
+
+
     // Left stick click (L3) toggles Fly/FPS movement (press once)
     if (state.buttons[GLFW_GAMEPAD_BUTTON_LEFT_THUMB] == GLFW_PRESS)
     {
@@ -410,10 +498,26 @@ void App::ProcessGamepadInput()
     // Left stick = WASD
     const float lx = ApplyDeadzone(state.axes[GLFW_GAMEPAD_AXIS_LEFT_X], gamepadDeadzone_);
     const float ly = ApplyDeadzone(state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y], gamepadDeadzone_);
+    const float lLT = ApplyDeadzone(state.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER], gamepadDeadzone_);
+
+    if (lLT > 0.f)
+    {
+
+        gpLTHeld_ = true;
+    }
+    else
+    {
+        gpLTHeld_ = false;
+    }
 
     const float forward = -ly; // GLFW: up is typically negative
-    if (forward > 0.0f)      camera_.ProcessKeyboard(FORWARD,  deltaTime_ * forward);
-    else if (forward < 0.0f) camera_.ProcessKeyboard(BACKWARD, deltaTime_ * (-forward));
+    if (forward > 0.0f)     
+        camera_.ProcessKeyboard(FORWARD,  deltaTime_ * forward, gpLTHeld_, 4.f);
+    else if (forward < 0.0f)  
+        camera_.ProcessKeyboard(BACKWARD, deltaTime_ * -forward, gpLTHeld_, 4.f);
+
+
+
 
     if (lx > 0.0f)      camera_.ProcessKeyboard(RIGHT, deltaTime_ * lx);
     else if (lx < 0.0f) camera_.ProcessKeyboard(LEFT,  deltaTime_ * (-lx));
@@ -436,6 +540,19 @@ void App::ProcessGamepadInput()
 
 void App::ProcessInput()
 {
+
+    // During the loading screen, only allow quitting (ESC / B).
+    if (loading_)
+    {
+        if (glfwGetKey(window_, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+            glfwSetWindowShouldClose(window_, true);
+
+        ProcessGamepadInput();
+        return;
+    }
+
+
+
     if (glfwGetKey(window_, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window_, true);
 
@@ -449,7 +566,7 @@ void App::ProcessInput()
     }
     if (glfwGetKey(window_, GLFW_KEY_F) == GLFW_RELEASE) {
         if (fHeld_) {
-            camera_.ToggleFlyMode();
+            ToggleFlyMode();
 //            std::cout << (camera_.IsFlyMode() ? "[Camera] Fly mode ON\n" : "[Camera] FPS mode ON\n");
             fHeld_ = false;
         }
